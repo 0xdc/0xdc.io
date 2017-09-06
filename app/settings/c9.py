@@ -1,4 +1,4 @@
-from . import *
+from .mysql import *
 
 if DEBUG:
     import sys
