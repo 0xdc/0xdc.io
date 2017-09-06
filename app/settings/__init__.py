@@ -11,6 +11,18 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
+import string
+from random import SystemRandom
+
+from django.core.exceptions import ImproperlyConfigured
+
+
+def env(env_var):
+    try:
+        return os.environ[env_var]
+    except KeyError:
+        error_msg = "Set the {} environment variable".format(env_var)
+    raise ImproperlyConfigured(error_msg)
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,14 +32,40 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ["SECRET_KEY"]
+try:
+    SECRET_KEY = env("SECRET_KEY")
+except ImproperlyConfigured:
+    SECRET_FILE = os.path.join(BASE_DIR, 'secretkey.txt')
+    try:
+        SECRET_KEY = open(SECRET_FILE).read().strip()
+    except IOError:
+        try:
+            SECRET_KEY = ''.join([SystemRandom().choice("".join([string.ascii_letters, string.digits, string.punctuation])) for i in range(63)])
+            with open(SECRET_FILE, 'w') as secret:
+                secret.write(SECRET_KEY)
+        except IOError:
+            raise ImproperlyConfigured('Please create the {} file with random characters \
+                to generate your secret key!'.format(SECRET_FILE))
 
+# By default, run with DEBUG=False
+# Debug environments must re-enable debug mode
+# An empty string is bool(False)
+os.environ.setdefault("DEBUG", "")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.environ["DEBUG"])
+DEBUG = bool(env("DEBUG"))
 
-ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(" ")
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+if not DEBUG:
+    ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(" ")
 
+# Detect proxied SSL header
+# https://docs.djangoproject.com/en/1.11/ref/settings/#secure-proxy-ssl-header
+os.environ.setdefault("SSL", "")
+ssl = bool(env("SSL"))
+if ssl:
+    print("Enabling SSL proxy header")
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+else:
+    print("Not enabling SSL proxy header")
 
 # Application definition
 
@@ -39,15 +77,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pdje',
+    'wk',
 ]
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -62,9 +100,9 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+            'django.template.context_processors.request',
+            'django.contrib.auth.context_processors.auth',
+            'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -78,18 +116,10 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': os.environ["DB_DEFAULT_HOST"],
-        'NAME': os.environ["DB_DEFAULT_NAME"],
-        'USER': os.environ["DB_DEFAULT_USER"],
-        'PASSWORD': os.environ["DB_DEFAULT_PASSWORD"],
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
-
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
 
@@ -107,7 +137,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
