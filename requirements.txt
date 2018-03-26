@@ -1,6 +1,5 @@
 git+https://github.com/0xdc/pdje
 git+https://github.com/0xdc/wk
-git+https://github.com/0xdc/django-aaisp-bandwidth
 Django==1.11.5
 gunicorn==19.7.1
 mysqlclient==1.3.12
