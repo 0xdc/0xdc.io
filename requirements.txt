@@ -1,5 +1,6 @@
 git+https://github.com/0xdc/pdje#egg=pdje
 git+https://github.com/0xdc/wk#egg=wk
+git+https://github.com/0xdc/0xdc.io-fe#egg=fe
 Django==1.11.5
 gunicorn==19.7.1
 mysqlclient==1.3.12
