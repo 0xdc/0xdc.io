@@ -54,7 +54,7 @@ os.environ.setdefault("DEBUG", "")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(env("DEBUG"))
 
-if not DEBUG:
+if "ALLOWED_HOSTS" in os.environ:
     ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(" ")
 
 # Detect proxied SSL header
