@@ -84,6 +84,7 @@ INSTALLED_APPS = [
     'pdje',
     'wk',
     'frontend',
+    'aaisp',
 ]
 
 MIDDLEWARE = [
