@@ -56,6 +56,11 @@ DEBUG = bool(env("DEBUG"))
 
 if not DEBUG:
     ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(" ")
+else:
+    try:
+        ALLOWED_HOSTS = env("ALLOWED_HOSTS").split(" ")
+    except ImproperlyConfigured:
+        ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Detect proxied SSL header
 # https://docs.djangoproject.com/en/1.11/ref/settings/#secure-proxy-ssl-header
