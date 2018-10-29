@@ -18,7 +18,7 @@ from django.conf.urls import include,url
 from django.contrib import admin
 
 urlpatterns = [
-    url(r'^.well-known/', include('wk.urls')),
+    url(r'^.well-known/', include('wk.urls', namespace="well-known")),
     url(r'^admin/', admin.site.urls),
     url(r'^', include('frontend.urls')),
 ]
