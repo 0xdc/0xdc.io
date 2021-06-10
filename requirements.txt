@@ -2,6 +2,6 @@ git+https://github.com/0xdc/pdje#egg=pdje
 git+https://github.com/0xdc/wk#egg=wk
 git+https://github.com/0xdc/0xdc.io-fe#egg=0xdc-io-fe
 git+https://github.com/0xdc/django-aaisp-bandwidth#egg=aaisp
-Django==2.2.20
+Django==2.2.24
 gunicorn==19.9.0
 mysqlclient==1.4.2.post1
